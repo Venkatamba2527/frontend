@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: campaign-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "2527"
+      POSTGRES_DB: campaigndb
+      TZ: Asia/Kolkata
+      PGTZ: Asia/Kolkata
+    ports:
+      - "5433:5432"     # host 5433 → container 5432 (avoids the native Postgres on 5432)
+    volumes:
+      - campaign_pgdata:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d campaigndb"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  campaign_pgdata:
